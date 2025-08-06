@@ -6,55 +6,80 @@ import {
   Param,
   Body,
   Query,
-  Request,
-  Response,
+  UsePipes,
+  ValidationPipe,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { CreateAdminDto } from './admin.dto';
+import { AdminService } from './admin.service';
 
 @Controller('admin')
 export class AdminController {
-  @Post('post-content')
-  postContent(@Body() body, @Request() req) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    return { message: 'Content posted', data: body, postedBy: req.user };
+  constructor(private readonly adminService: AdminService) {}
+
+  @Post('/addadmin')
+  @UsePipes(new ValidationPipe())
+  addAdmin(@Body() data: CreateAdminDto): string {
+    console.log(data);
+    return this.adminService.addAdmin(data);
+  }
+
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          cb(null, Date.now() + '-' + file.originalname);
+        },
+      }),
+    }),
+  )
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    console.log(file);
+    return { message: 'File uploaded successfully', filename: file.filename };
   }
 
   @Get('contents')
   getAllContent(@Query('type') type: string) {
-    return { message: 'All content', filter: type || 'none' };
+    return this.adminService.getAllContent(type);
   }
 
   @Delete('remove-content/:id')
   removeContent(@Param('id') id: string) {
-    return { message: `Content with ID ${id} removed` };
+    return this.adminService.removeContent(id);
   }
 
   @Get('teachers')
   getAllTeachers() {
-    return { message: 'List of teachers' };
+    return this.adminService.getAllTeachers();
   }
 
   @Get('teacher/:id')
   getTeacherById(@Param('id') id: string) {
-    return { message: `Details for teacher ${id}` };
+    return this.adminService.getTeacherById(id);
   }
 
   @Delete('remove-teacher/:id')
   removeTeacher(@Param('id') id: string) {
-    return { message: `Teacher with ID ${id} removed` };
+    return this.adminService.removeTeacher(id);
   }
 
   @Get('students')
   getAllStudents() {
-    return { message: 'List of students' };
+    return this.adminService.getAllStudents();
   }
 
   @Get('student/:id')
   getStudentById(@Param('id') id: string) {
-    return { message: `Details for student ${id}` };
+    return this.adminService.getStudentById(id);
   }
 
   @Delete('remove-student/:id')
   removeStudent(@Param('id') id: string) {
-    return { message: `Student with ID ${id} removed` };
+    return this.adminService.removeStudent(id);
   }
 }

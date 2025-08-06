@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { CreateAdminDto } from './admin.dto';
 
 @Injectable()
 export class AdminService {
-  postContent(body: any, user: any) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return { message: 'Content posted', data: body, postedBy: user };
+  addAdmin(data: CreateAdminDto): string {
+    console.log('Adding admin:', data);
+    return 'Admin added successfully';
+  }
+
+  postContent(body: CreateAdminDto, user: string | undefined) {
+    return { message: 'Content posted', data: body, postedBy: user || 'Anonymous' };
   }
 
   getAllContent(type?: string) {
@@ -37,9 +42,5 @@ export class AdminService {
 
   removeStudent(id: string) {
     return { message: `Student with ID ${id} removed` };
-  }
-
-  customResponse() {
-    return { message: 'This is a custom response' };
   }
 }
