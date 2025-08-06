@@ -11,7 +11,6 @@ export class UpdateProfileDto {
   name: string;
 
   @IsString()
-  subject: string;
   @MinLength(6, { message: 'Password must be at least 6 characters' })
   @Matches(/.*[a-z].*/, { message: 'Password must contain at least one lowercase letter' })
   password: string;
